@@ -110,4 +110,3 @@ Ejecuta Vitest en modo watch (pruebas para formularios, páginas con API mockead
 - Añadir CI/CD que ejecute `mvn test` y `npm test`.
 - Integrar subida de evidencias/fotos en las órdenes de servicio.
 
-Con esta estructura puedes enseñar arquitectura fullstack moderna manteniendo el dominio original de la app de gestión de residuos. Cada capa está fuertemente comentada y separada para que estudiantes de 3er semestre sigan el flujo completo desde React hasta Spring Boot.  
