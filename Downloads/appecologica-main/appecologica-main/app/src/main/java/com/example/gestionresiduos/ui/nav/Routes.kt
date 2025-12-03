@@ -35,5 +35,5 @@ sealed class Route(val path: String) {
     data object AdminMateriales : Route("admin/materiales")
     data object AdminReportes : Route("admin/reportes")
 
-    // TODO: agrega aquí tus rutas extra manteniendo el mismo estilo
+
 }

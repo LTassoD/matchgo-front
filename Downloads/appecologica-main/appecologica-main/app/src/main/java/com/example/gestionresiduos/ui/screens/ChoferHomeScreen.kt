@@ -11,7 +11,7 @@ fun ChoferHomeScreen(onOpenRuta: (String) -> Unit) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("Menú Chofer", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(12.dp))
-        // TODO: Cards / botones grandes según tu mockup (Rutas del día, Historial, Perfil, etc.)
+
         Button(
             onClick = { onOpenRuta("r1") },
             modifier = Modifier.fillMaxWidth()

@@ -28,19 +28,58 @@ public class OrdenServicioService {
         return ordenServicioRepository.findByRutaId(rutaId);
     }
 
+    public OrdenServicio findByRutaAndPunto(Long rutaId, Long puntoId) {
+        return ordenServicioRepository.findByRutaIdAndPuntoId(rutaId, puntoId)
+                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada para la ruta y punto"));
+    }
+
+    public List<OrdenServicio> findSinRuta() {
+        return ordenServicioRepository.findByRutaIsNull();
+    }
+
     @Transactional
     public OrdenServicio updateEstado(Long ordenId, OrdenUpdateRequest request) {
         OrdenServicio orden = ordenServicioRepository.findById(ordenId)
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
 
-        if (request.estado() != null) {
-            orden.setEstado(request.estado());
-        }
-        orden.setObservacion(request.observacion());
+        aplicarEstadoYObservacion(orden, request.estado(), request.observacion());
 
         OrdenServicio saved = ordenServicioRepository.save(orden);
+        registrarHistorialSiCompleta(saved, request.estado());
 
-        if (request.estado() == EstadoOrden.COMPLETADA && saved.getRuta() != null) {
+        return saved;
+    }
+
+    @Transactional
+    public OrdenServicio iniciarPorPunto(Long puntoId) {
+        OrdenServicio orden = obtenerPorPunto(puntoId);
+        aplicarEstadoYObservacion(orden, EstadoOrden.EN_PROCESO, orden.getObservacion());
+        return ordenServicioRepository.save(orden);
+    }
+
+    @Transactional
+    public OrdenServicio finalizarPorPunto(Long puntoId, String observacion) {
+        OrdenServicio orden = obtenerPorPunto(puntoId);
+        aplicarEstadoYObservacion(orden, EstadoOrden.COMPLETADA, observacion);
+        OrdenServicio saved = ordenServicioRepository.save(orden);
+        registrarHistorialSiCompleta(saved, EstadoOrden.COMPLETADA);
+        return saved;
+    }
+
+    private OrdenServicio obtenerPorPunto(Long puntoId) {
+        return ordenServicioRepository.findFirstByPuntoId(puntoId)
+                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada para el punto " + puntoId));
+    }
+
+    private void aplicarEstadoYObservacion(OrdenServicio orden, EstadoOrden nuevoEstado, String observacion) {
+        if (nuevoEstado != null) {
+            orden.setEstado(nuevoEstado);
+        }
+        orden.setObservacion(observacion);
+    }
+
+    private void registrarHistorialSiCompleta(OrdenServicio saved, EstadoOrden nuevoEstado) {
+        if (nuevoEstado == EstadoOrden.COMPLETADA && saved.getRuta() != null) {
             HistorialLabor entry = HistorialLabor.builder()
                     .chofer(saved.getRuta().getChofer())
                     .fecha(LocalDate.now())
@@ -49,7 +88,5 @@ public class OrdenServicioService {
                     .build();
             historialLaborRepository.save(entry);
         }
-
-        return saved;
     }
 }

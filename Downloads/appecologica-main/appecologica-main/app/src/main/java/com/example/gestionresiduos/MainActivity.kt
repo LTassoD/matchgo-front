@@ -18,9 +18,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            com.example.gestionresiduos.ui.theme.GestionResiduosTheme {
+            com.example.gestionresiduos.ui.theme.GestioResiduosTheme {
                 com.example.gestionresiduos.ui.nav.AppNavHost()
             }
         }
     }
 }
+

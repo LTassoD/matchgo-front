@@ -19,7 +19,6 @@ fun LoginScreen(
     val usuario by vm.usuario.collectAsState()
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
-    val validation by vm.validation.collectAsState()
 
     var rut by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
@@ -31,31 +30,11 @@ fun LoginScreen(
     Column(Modifier.fillMaxSize().padding(24.dp)) {
         Text("GestioResiduos", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(16.dp))
-        OutlinedTextField(
-            value = rut,
-            onValueChange = {
-                rut = it
-                vm.clearError()
-            },
-            label = { Text("RUT") },
-            isError = validation.rutError != null,
-            supportingText = { validation.rutError?.let { Text(it) } },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+        OutlinedTextField(rut, { rut = it }, label = { Text("RUT") }, singleLine = true)
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
-            value = pass,
-            onValueChange = {
-                pass = it
-                vm.clearError()
-            },
-            label = { Text("Contraseña") },
-            singleLine = true,
-            isError = validation.passwordError != null,
-            supportingText = { validation.passwordError?.let { Text(it) } },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            pass, { pass = it }, label = { Text("Contraseña") },
+            singleLine = true, visualTransformation = PasswordVisualTransformation()
         )
         Spacer(Modifier.height(12.dp))
         Button(
@@ -68,6 +47,6 @@ fun LoginScreen(
             Text(error!!, color = MaterialTheme.colorScheme.error)
         }
 
-        // TODO: maqueta layout según tu mockup (logo, branding, etc.)
+
     }
 }

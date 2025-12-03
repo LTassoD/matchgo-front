@@ -9,6 +9,7 @@ public record RutaRequest(
         @NotNull LocalDate fecha,
         @NotNull Long choferId,
         @NotNull Long vehiculoId,
-        List<Long> puntoIds
+        List<Long> puntoIds,
+        List<Long> ordenIds
 ) {
 }

@@ -1,22 +1,2 @@
 package com.example.gestionresiduos.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-
-@Composable
-fun SettingsWipScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("Sección en desarrollo", style = MaterialTheme.typography.headlineSmall)
-        Text("Muy pronto podrás personalizar más preferencias desde aquí.")
-    }
-}

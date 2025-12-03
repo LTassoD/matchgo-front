@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.GestionResiduos" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- ... -->
+    </style>
+
+
+    <!--  AÑADE ESTE NUEVO ESTILO PARA LA SPLASH SCREEN  -->
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- 1. El color de fondo que se mostrará -->
+        <item name="windowSplashScreenBackground">@color/yellow_primary</item>
+
+        <!-- 2. Tu logo. ASEGÚRATE de que 'logo_empresa.xml' exista en 'res/drawable' -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/vectorecologica </item>
+
+        <!-- 3. (Opcional pero recomendado) Duración del icono en pantalla -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+
+
+        <!-- 4. El tema que se aplicará DESPUÉS de la splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.GestionResiduos</item>
+    </style>
+    <!-- ============================================= -->
+
+</resources>

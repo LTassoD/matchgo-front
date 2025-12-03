@@ -9,20 +9,12 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.ExperimentalAnimationApi
 
 // Importa tus pantallas (asegúrate de tenerlas en ui/screens)
-import com.example.gestionresiduos.ui.screens.AdminClientesScreen
-import com.example.gestionresiduos.ui.screens.AdminHomeScreen
-import com.example.gestionresiduos.ui.screens.AdminMaterialesScreen
-import com.example.gestionresiduos.ui.screens.AdminReportesScreen
-import com.example.gestionresiduos.ui.screens.AdminUsuariosScreen
-import com.example.gestionresiduos.ui.screens.AdminVehiculosScreen
-import com.example.gestionresiduos.ui.screens.CapturaFotosScreen
-import com.example.gestionresiduos.ui.screens.ChoferHomeScreen
-import com.example.gestionresiduos.ui.screens.HistorialRutasScreen
 import com.example.gestionresiduos.ui.screens.LoginScreen
-import com.example.gestionresiduos.ui.screens.OrdenServicioScreen
-import com.example.gestionresiduos.ui.screens.PuntoDetalleScreen
+import com.example.gestionresiduos.ui.screens.ChoferHomeScreen
 import com.example.gestionresiduos.ui.screens.RutaDetalleScreen
-import com.example.gestionresiduos.ui.screens.RutasDelDiaScreen
+import com.example.gestionresiduos.ui.screens.OrdenServicioScreen
+import com.example.gestionresiduos.ui.screens.AdminHomeScreen
+import com.example.gestionresiduos.ui.screens.AdminClientesScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -79,10 +71,8 @@ fun AppNavHost() {
             exitTransition = { slideOutToLeft() },
             popEnterTransition = { slideInFromLeft() },
             popExitTransition = { slideOutToRight() }
-        ) { backStack ->
-            val rutaIdArg = backStack.arguments?.getString("rutaId") ?: ""
+        ) {
             RutaDetalleScreen(
-                rutaId = rutaIdArg,
                 onOpenOS = { rutaId, puntoId ->
                     nav.navigate(Route.OrdenServicio.build(rutaId, puntoId))
                 }
@@ -114,13 +104,7 @@ fun AppNavHost() {
             popEnterTransition = { slideInFromLeft() },
             popExitTransition = { slideOutToRight() }
         ) {
-            AdminHomeScreen(
-                onOpenClientes = { nav.navigate(Route.AdminClientes.path) },
-                onOpenUsuarios = { nav.navigate(Route.AdminUsuarios.path) },
-                onOpenVehiculos = { nav.navigate(Route.AdminVehiculos.path) },
-                onOpenMateriales = { nav.navigate(Route.AdminMateriales.path) },
-                onOpenReportes = { nav.navigate(Route.AdminReportes.path) }
-            )
+            AdminHomeScreen(onOpenClientes = { nav.navigate(Route.AdminClientes.path) })
         }
 
         composable(

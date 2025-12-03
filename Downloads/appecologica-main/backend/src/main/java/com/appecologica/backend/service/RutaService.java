@@ -75,6 +75,18 @@ public class RutaService {
                 ordenServicioRepository.save(orden);
             }
         }
+        // Asociar órdenes existentes (creadas previamente) si se envían en la solicitud
+        if (request.ordenIds() != null) {
+            for (Long ordenId : request.ordenIds()) {
+                OrdenServicio orden = ordenServicioRepository.findById(ordenId)
+                        .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada: " + ordenId));
+                if (orden.getRuta() != null) {
+                    throw new IllegalArgumentException("La orden " + ordenId + " ya está asignada a una ruta");
+                }
+                orden.setRuta(saved);
+                ordenServicioRepository.save(orden);
+            }
+        }
 
         return saved;
     }

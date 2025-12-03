@@ -63,6 +63,7 @@ public class DataSeeder implements CommandLineRunner {
                     .rut("11111111-1")
                     .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
+                    .enabled(true)
                     .build();
             User chofer = User.builder()
                     .nombre("Chofer Demo")
@@ -70,6 +71,7 @@ public class DataSeeder implements CommandLineRunner {
                     .rut("22222222-2")
                     .password(passwordEncoder.encode("chofer123"))
                     .role(Role.CHOFER)
+                    .enabled(true)
                     .build();
             userRepository.save(admin);
             userRepository.save(chofer);
@@ -153,7 +155,7 @@ public class DataSeeder implements CommandLineRunner {
                     .map(com.appecologica.backend.model.PuntoRecoleccion::getId)
                     .collect(Collectors.toList());
 
-            rutaService.create(new RutaRequest(LocalDate.now(), choferId, vehiculoId, puntos));
+            rutaService.create(new RutaRequest(LocalDate.now(), choferId, vehiculoId, puntos, null));
         }
     }
 }

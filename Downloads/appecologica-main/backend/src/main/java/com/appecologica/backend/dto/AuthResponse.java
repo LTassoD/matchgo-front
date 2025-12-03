@@ -4,7 +4,9 @@ import com.appecologica.backend.model.Role;
 
 public record AuthResponse(
         String token,
+        Long id,
         String nombre,
+        String rut,
         Role role
 ) {
 }

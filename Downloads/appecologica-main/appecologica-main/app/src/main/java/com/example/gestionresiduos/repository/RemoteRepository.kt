@@ -3,6 +3,7 @@ package com.example.gestionresiduos.repository
 import com.example.gestionresiduos.repository.remote.NetworkModule
 import com.example.gestionresiduos.repository.remote.dto.FinalizarOrdenRequestDTO
 import com.example.gestionresiduos.repository.remote.dto.LoginRequestDTO
+import com.example.gestionresiduos.repository.remote.dto.LoginResponseDTO
 import com.example.gestionresiduos.repository.remote.mapper.*
 import com.example.gestionresiduos.model.*
 
@@ -12,7 +13,7 @@ class RemoteRepository : Repository {
     private val api = NetworkModule.api
 
     override suspend fun login(rut: String, password: String): Usuario {
-        val dto = api.login(LoginRequestDTO(rut, password))
+        val dto: LoginResponseDTO = api.login(LoginRequestDTO(rut, password))
         return dto.toDomain()
     }
 

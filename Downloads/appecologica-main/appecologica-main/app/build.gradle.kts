@@ -25,8 +25,9 @@ android {
 
     buildTypes {
         debug {
-            // ingresar aqui url (termina en /) cuando tengas Railway o algun host listo
-            buildConfigField("String","BASE_URL","\"https://<ingresar-aqui-url>/\"")
+            // URL Pública del Gateway en Railway (termina con '/')
+            // Reemplaza con tu dominio real de Railway
+            buildConfigField("String","BASE_URL","\"https://YOUR-GATEWAY.up.railway.app/\"")
         }
         release {
             isMinifyEnabled = true

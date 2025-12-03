@@ -27,6 +27,12 @@ public class RutaController {
         return rutaService.findAll();
     }
 
+    @Operation(summary = "Detalle de ruta por id")
+    @GetMapping("/{id}")
+    public Ruta findById(@PathVariable Long id) {
+        return rutaService.findById(id);
+    }
+
     @Operation(summary = "Rutas asignadas a un chofer")
     @GetMapping("/chofer/{choferId}")
     public List<Ruta> findByChofer(@PathVariable Long choferId) {
