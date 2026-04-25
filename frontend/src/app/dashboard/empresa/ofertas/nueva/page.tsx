@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, Button } from '@/components/ui'
-import { db, isSupabaseConfigured } from '@/lib/supabase'
+import { db, isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 const categorias = [
   { value: '', label: 'Selecciona una categoría' },
@@ -61,9 +61,8 @@ export default function NuevaOfertaPage() {
     setLoading(true)
 
     try {
-      if (isSupabaseConfigured) {
-        // Obtener empresa del usuario actual
-        const { data: { user } } = await import('@/lib/supabase').then(m => m.supabase?.auth.getUser())
+      if (isSupabaseConfigured && supabase) {
+        const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) throw new Error('No hay sesión')
 

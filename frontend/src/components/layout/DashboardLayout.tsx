@@ -16,6 +16,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
 
   useEffect(() => {
     const checkAuth = async () => {
+      if (!supabase) return
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.push('/auth/login')
@@ -25,7 +26,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
   }, [router])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
     router.push('/auth/login')
   }
 

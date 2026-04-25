@@ -1,8 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Button, Input, Badge } from '@/components/ui'
 import { supabase, db, isSupabaseConfigured } from '@/lib/supabase'
+
+const validarRut = (rut: string): boolean => {
+  if (!rut || rut.length < 3) return false
+  const rutClean = rut.replace(/[^0-9kK]/g, '').toUpperCase()
+  if (rutClean.length < 2) return false
+  const cuerpo = rutClean.slice(0, -1)
+  const dv = rutClean.slice(-1)
+  let suma = 0
+  let mul = 2
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo[i]) * mul
+    mul = mul === 7 ? 2 : mul + 1
+  }
+  const resto = suma % 11
+  let dvCalculado: string
+  if (resto === 0) dvCalculado = '0'
+  else if (resto === 1) dvCalculado = 'K'
+  else dvCalculado = (11 - resto).toString()
+  return dvCalculado === dv
+}
 
 export default function PerfilPage() {
   const [loading, setLoading] = useState(true)
@@ -11,50 +31,80 @@ export default function PerfilPage() {
   const [user, setUser] = useState<any>(null)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
+  const [rutError, setRutError] = useState('')
+  const loadedRef = useRef(false)
 
   useEffect(() => {
-    loadPerfil()
+    if (!loadedRef.current) {
+      loadedRef.current = true
+      loadPerfil()
+    }
   }, [])
 
   const loadPerfil = async () => {
+    console.log('=== INICIANDO loadPerfil ===')
     try {
       if (isSupabaseConfigured && supabase) {
         const { data: { user: authUser } } = await supabase.auth.getUser()
         
-        if (authUser) {
-          setUser(authUser)
-          const perfilData = await db.getPerfilTrabajador(authUser.id)
+        console.log('Auth user:', authUser?.id)
+        
+        if (!authUser) {
+          console.log('NO HAY AUTH USER')
+          setLoading(false)
+          return
+        }
+        
+        setUser(authUser)
+        
+        // query directo
+        const { data: perfilData, error } = await supabase
+          .from('trabajador')
+          .select('*')
+          .eq('usuario_id', authUser.id)
+          .maybeSingle()
+        
+        console.log('Query result:', { perfilData, error })
+        
+        if (perfilData) {
+          console.log('PERFIL ENCONTRADO, settting...')
+          setPerfil(perfilData)
+          console.log('perfil state:', perfilData)
+        } else {
+          console.log('PERFIL NO EXISTE, creando...')
+          const { error: insertError } = await supabase
+            .from('trabajador')
+            .insert({
+              usuario_id: authUser.id,
+              nombre_completo: authUser.user_metadata?.nombre || authUser.email?.split('@')[0] || 'Usuario',
+              rut: '',
+              telefono: '',
+              region: 'RM',
+              comuna: '',
+            })
           
-          if (!perfilData) {
-            // Crear perfil automáticamente si no existe
-            const { error: createError } = await supabase
-              .from('trabajador')
-              .insert({
-                usuario_id: authUser.id,
-                nombre_completo: authUser.user_metadata?.nombre || '',
-                rut: '',
-                telefono: '',
-                region: 'RM',
-                comuna: '',
-                disponibilidad: { dias: [], horarios: [] },
-                pretension_renta: { min: 0, max: 0, tipo: 'mes' },
-              })
-            
-            if (!createError) {
-              const newPerfil = await db.getPerfilTrabajador(authUser.id)
-              setPerfil(newPerfil)
-            }
-          } else {
-            setPerfil(perfilData)
+          if (insertError) {
+            console.log('Insert error:', insertError)
           }
+          
+          // buscar de nuevo
+          const { data: nuevoPerfil } = await supabase
+            .from('trabajador')
+            .select('*')
+            .eq('usuario_id', authUser.id)
+            .maybeSingle()
+          
+          console.log('Nuevo perfil:', nuevoPerfil)
+          setPerfil(nuevoPerfil)
         }
       } else {
         const { mockTrabajadores } = await import('@/lib/mockData')
         setPerfil(mockTrabajadores[0])
       }
     } catch (err) {
-      console.error(err)
+      console.error('CATCH ERROR:', err)
     } finally {
+      console.log('=== FIN loadPerfil, loading=false ===')
       setLoading(false)
     }
   }
@@ -72,6 +122,7 @@ export default function PerfilPage() {
           .from('trabajador')
           .update({
             nombre_completo: perfil.nombre_completo,
+            rut: perfil.rut,
             telefono: perfil.telefono,
             region: perfil.region,
             comuna: perfil.comuna,
@@ -87,7 +138,6 @@ export default function PerfilPage() {
         setMensaje('✅ Perfil guardado exitosamente')
         setTimeout(() => setMensaje(''), 3000)
       }
-      setEditando(false)
     } catch (err: any) {
       console.error(err)
       setMensaje('❌ Error al guardar: ' + err.message)
@@ -161,7 +211,32 @@ export default function PerfilPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">RUT</label>
-                <p className="text-gray-900">{perfil?.rut || 'No registrado'}</p>
+                {editando ? (
+                  <div>
+                    <input
+                      name="rut"
+                      value={perfil?.rut || ''}
+                      onChange={(e) => {
+                        const valor = e.target.value
+                        setPerfil((prev: any) => ({ ...prev, rut: valor }))
+                        if (valor.length >= 3) {
+                          if (!validarRut(valor)) {
+                            setRutError('RUT inválido')
+                          } else {
+                            setRutError('')
+                          }
+                        } else {
+                          setRutError('')
+                        }
+                      }}
+                      placeholder="12345678-9"
+                      className={`w-full px-3 py-2 border rounded-lg ${rutError ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {rutError ? <p className="text-red-500 text-sm mt-1">{rutError}</p> : null}
+                  </div>
+                ) : (
+                  <p className="text-gray-900">{perfil?.rut || 'No registrado'}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>

@@ -81,7 +81,7 @@ export default function RegisterPage() {
 
           if (userError) {
             console.error('User insert error:', userError)
-            throw userError
+            throw new Error('Error al crear usuario: ' + userError.message)
           }
           console.log('Usuario insertado en tabla')
 
@@ -90,27 +90,36 @@ export default function RegisterPage() {
             const { error: empresaError } = await supabase.from('empresa').insert({
               usuario_id: authData.user.id,
               razon_social: nombre,
-              rut: '',
+              rut: 'rut-' + Date.now(),
               direccion: '',
               telefono: '',
               contacto_nombre: nombre,
               region: 'RM',
             })
-            console.log('Empresa insert error:', empresaError)
+            if (empresaError) {
+              console.error('Empresa insert error:', empresaError)
+              throw new Error('Error al crear empresa: ' + empresaError.message)
+            }
+            console.log('Empresa creada OK')
+            router.push('/dashboard/empresa')
           } else {
+            const randomRut = 'rut-' + Date.now()
             const { error: trabajadorError } = await supabase.from('trabajador').insert({
               usuario_id: authData.user.id,
               nombre_completo: nombre,
-              rut: '',
+              rut: randomRut,
               telefono: '',
-              region: 'RM',
+              region: '',
               comuna: '',
             })
-            console.log('Trabajador insert error:', trabajadorError)
+            if (trabajadorError) {
+              console.error('Trabajador insert error:', trabajadorError)
+              throw new Error('Error al crear trabajador: ' + trabajadorError.message)
+            }
+            console.log('Trabajador creado OK')
+            router.push('/dashboard/trabajador')
           }
         }
-
-        router.push('/auth/login?registered=true')
       } else {
         // Modo demo
         setTimeout(() => {

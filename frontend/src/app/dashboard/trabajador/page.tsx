@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, Button, Spinner } from '@/components/ui'
-import { db, isSupabaseConfigured } from '@/lib/supabase'
+import { db, isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export default function DashboardTrabajador() {
   const router = useRouter()
@@ -24,10 +24,12 @@ export default function DashboardTrabajador() {
         setOfertas(data?.slice(0, 5) || [])
         
         // Obtener datos del trabajador
-        const { data: { user } } = await import('@/lib/supabase').then(m => m.supabase?.auth.getUser())
+        if (isSupabaseConfigured && supabase) {
+        const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const trabajadorData = await db.getPerfilTrabajador(user.id)
           setTrabajador(trabajadorData)
+        }
         }
         
         setStats({

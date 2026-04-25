@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '@/components/ui'
 import { supabase, db, isSupabaseConfigured } from '@/lib/supabase'
 
@@ -10,9 +10,13 @@ export default function PerfilPage() {
   const [perfil, setPerfil] = useState<any>(null)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
+  const loadedRef = useRef(false)
 
   useEffect(() => {
-    loadPerfil()
+    if (!loadedRef.current) {
+      loadedRef.current = true
+      loadPerfil()
+    }
   }, [])
 
   const loadPerfil = async () => {
@@ -20,16 +24,26 @@ export default function PerfilPage() {
       if (isSupabaseConfigured && supabase) {
         const { data: { user } } = await supabase.auth.getUser()
         
+        console.log('Auth user:', user)
+        
         if (user) {
-          let perfilData = await db.getPerfilEmpresa(user.id)
+          // Buscar perfil directamente
+          const { data: perfilData, error: perfilError } = await supabase
+            .from('empresa')
+            .select('*')
+            .eq('usuario_id', user.id)
+            .maybeSingle()
+          
+          console.log('Perfil data:', perfilData, 'error:', perfilError)
           
           if (!perfilData) {
             // Crear perfil automáticamente si no existe
+            console.log('Creando perfil para empresa:', user.id)
             const { error: createError } = await supabase
               .from('empresa')
               .insert({
                 usuario_id: user.id,
-                razon_social: user.user_metadata?.nombre || 'Mi Empresa',
+                razon_social: user.user_metadata?.nombre || user.email?.split('@')[0] || 'Mi Empresa',
                 rut: '',
                 direccion: '',
                 telefono: '',
@@ -37,11 +51,19 @@ export default function PerfilPage() {
                 region: 'RM',
               })
             
+            console.log('Create perfil error:', createError)
+            
             if (!createError) {
-              perfilData = await db.getPerfilEmpresa(user.id)
+              const { data: newPerfil } = await supabase
+                .from('empresa')
+                .select('*')
+                .eq('usuario_id', user.id)
+                .maybeSingle()
+              setPerfil(newPerfil)
             }
+          } else {
+            setPerfil(perfilData)
           }
-          setPerfil(perfilData)
         }
       }
     } catch (err) {

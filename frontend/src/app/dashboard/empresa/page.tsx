@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, Button, Spinner, Badge } from '@/components/ui'
-import { db, isSupabaseConfigured } from '@/lib/supabase'
+import { db, isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export default function DashboardEmpresa() {
   const router = useRouter()
@@ -19,12 +19,15 @@ export default function DashboardEmpresa() {
 
   const loadData = async () => {
     try {
+      let data: any[] = []
       if (isSupabaseConfigured) {
-        const data = await db.getOfertas()
+        data = await db.getOfertas()
         setOfertas(data?.slice(0, 5) || [])
-        
-        // Obtener datos de empresa
-        const { data: { user } } = await import('@/lib/supabase').then(m => m.supabase?.auth.getUser())
+      }
+      
+      // Obtener datos de empresa
+      if (isSupabaseConfigured && supabase) {
+        const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const empresaData = await db.getPerfilEmpresa(user.id)
           setEmpresa(empresaData)

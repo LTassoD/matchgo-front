@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card, Button, Spinner, Badge } from '@/components/ui'
+import { supabase, db, isSupabaseConfigured } from '@/lib/supabase'
 import { mockOfertas } from '@/lib/mockData'
 
 export default function OfertasPage() {
@@ -14,24 +15,25 @@ export default function OfertasPage() {
     jornada: '',
   })
 
+  const loadOfertas = async () => {
+    setLoading(true)
+    try {
+      if (isSupabaseConfigured && supabase) {
+        const data = await db.getOfertas({ estado: 'ABIERTA' })
+        setOfertas(data)
+      } else {
+        setOfertas(mockOfertas.filter(o => o.estado === 'ABIERTA'))
+      }
+    } catch (err) {
+      console.error(err)
+      setOfertas(mockOfertas.filter(o => o.estado === 'ABIERTA'))
+    }
+    setLoading(false)
+  }
+
   useEffect(() => {
-    setTimeout(() => {
-      let filtered = mockOfertas.filter(o => o.estado === 'ABIERTA')
-      
-      if (filtros.categoria) {
-        filtered = filtered.filter(o => o.categoria === filtros.categoria)
-      }
-      if (filtros.region) {
-        filtered = filtered.filter(o => o.region === filtros.region)
-      }
-      if (filtros.jornada) {
-        filtered = filtered.filter(o => o.jornada === filtros.jornada)
-      }
-      
-      setOfertas(filtered)
-      setLoading(false)
-    }, 300)
-  }, [filtros])
+    loadOfertas()
+  }, [])
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFiltros(prev => ({ ...prev, [e.target.name]: e.target.value }))

@@ -1,19 +1,20 @@
-import { supabase } from './supabase'
+import { supabase, isSupabaseConfigured } from './supabase'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 async function getSession() {
+  if (!supabase) return null
   const { data: { session } } = await supabase.auth.getSession()
   return session
 }
 
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const session = await getSession()
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
-    ...options.headers,
+    ...options.headers as Record<string, string>,
   }
   
   if (session?.access_token) {
