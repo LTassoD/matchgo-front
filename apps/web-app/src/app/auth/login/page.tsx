@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { authApi } from '@/lib/api'
 import { Button, Input } from '@/components/ui'
 
 export default function LoginPage() {
@@ -45,38 +46,13 @@ export default function LoginPage() {
           password,
         })
 
-        console.log('Login response:', data, authError)
+        if (authError) throw authError
 
-        if (authError) {
-          // Si el error es que necesita confirmación, intentamos de otra forma
-          if (authError.message.includes('Email not confirmed')) {
-            // Buscar usuario por email en la tabla
-            const { data: usuarioData } = await supabase
-              .from('usuario')
-              .select('*')
-              .eq('email', email)
-              .single()
-            
-            if (usuarioData) {
-              // Ir directamente al dashboard según el tipo
-              router.push(usuarioData.tipo === 'EMPRESA' ? '/dashboard/empresa' : '/dashboard/trabajador')
-              return
-            }
-          }
-          throw authError
-        }
-
-        // Verificar tipo de usuario
         if (data.user) {
-          const { data: usuario } = await supabase
-            .from('usuario')
-            .select('tipo')
-            .eq('id', data.user.id)
-            .single()
+          const userData = await authApi.me()
+          const tipo = userData?.user_metadata?.tipo || (await supabase.from('usuario').select('tipo').eq('id', data.user.id).maybeSingle()).data?.tipo
 
-          console.log('Usuario data:', usuario)
-
-          if (usuario?.tipo === 'EMPRESA') {
+          if (tipo === 'EMPRESA') {
             router.push('/dashboard/empresa')
           } else {
             router.push('/dashboard/trabajador')

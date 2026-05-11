@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { authApi } from '@/lib/api'
 import { Button, Input } from '@/components/ui'
 
 export default function RegisterPage() {
@@ -45,81 +46,18 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      if (isSupabaseConfigured && supabase) {
-        console.log('Registrando en Supabase...', { email, tipo, nombre })
+      if (isSupabaseConfigured) {
+        console.log('Registrando a través del BFF...', { email, tipo, nombre })
         
-        // 1. Crear usuario en Auth (sin verificación de email para demo)
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              nombre,
-              tipo,
-            },
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        })
+        // Usar el BFF para crear usuario y perfiles (usa service_role key)
+        await authApi.signUp(email, password, nombre, tipo)
+        console.log('Usuario creado correctamente')
 
-        if (authError) {
-          console.error('Auth error:', authError)
-          throw authError
-        }
+        // Iniciar sesión para obtener el token y redirigir
+        const { data: { session } } = await supabase!.auth.signInWithPassword({ email, password })
+        if (!session) throw new Error('Error al iniciar sesión automáticamente')
 
-        console.log('Auth user created:', authData.user)
-
-        // 2. Crear registro en tabla usuario
-        if (authData.user) {
-          const { error: userError } = await supabase
-            .from('usuario')
-            .insert({
-              id: authData.user.id,
-              email,
-              nombre,
-              tipo,
-            })
-
-          if (userError) {
-            console.error('User insert error:', userError)
-            throw new Error('Error al crear usuario: ' + userError.message)
-          }
-          console.log('Usuario insertado en tabla')
-
-          // 3. Crear perfil según tipo
-          if (tipo === 'EMPRESA') {
-            const { error: empresaError } = await supabase.from('empresa').insert({
-              usuario_id: authData.user.id,
-              razon_social: nombre,
-              rut: 'rut-' + Date.now(),
-              direccion: '',
-              telefono: '',
-              contacto_nombre: nombre,
-              region: 'RM',
-            })
-            if (empresaError) {
-              console.error('Empresa insert error:', empresaError)
-              throw new Error('Error al crear empresa: ' + empresaError.message)
-            }
-            console.log('Empresa creada OK')
-            router.push('/dashboard/empresa')
-          } else {
-            const randomRut = 'rut-' + Date.now()
-            const { error: trabajadorError } = await supabase.from('trabajador').insert({
-              usuario_id: authData.user.id,
-              nombre_completo: nombre,
-              rut: randomRut,
-              telefono: '',
-              region: '',
-              comuna: '',
-            })
-            if (trabajadorError) {
-              console.error('Trabajador insert error:', trabajadorError)
-              throw new Error('Error al crear trabajador: ' + trabajadorError.message)
-            }
-            console.log('Trabajador creado OK')
-            router.push('/dashboard/trabajador')
-          }
-        }
+        router.push('/dashboard/' + (tipo === 'EMPRESA' ? 'empresa' : 'trabajador'))
       } else {
         // Modo demo
         setTimeout(() => {
