@@ -106,7 +106,7 @@ export class FacturacionService {
     if (hasta) query = query.lte('created_at', hasta)
     const { data } = await query
     if (!data) return { total: 0, count: 0, data: [] }
-    const total = data.reduce((sum, f) => sum + (f.estado === 'PAGADA' ? f.monto : 0), 0)
+    const total = data.reduce((sum: number, f: any) => sum + (f.estado === 'PAGADA' ? f.monto : 0), 0)
     return { total, count: data.length, data }
   }
 }

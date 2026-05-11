@@ -15,7 +15,7 @@ export class JwtAuthGuard implements CanActivate {
       process.env.SUPABASE_ANON_KEY!,
     )
 
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const { data: { user }, error } = await (supabase.auth as any).getUser(token)
     if (error || !user) throw new UnauthorizedException('Token inválido')
 
     request.user = user

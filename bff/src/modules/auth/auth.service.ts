@@ -5,14 +5,14 @@ import { getServerClient, getAnonClient } from '../../common/supabase'
 export class AuthService {
   async signIn(email: string, password: string) {
     const supabase = getAnonClient()
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await (supabase.auth as any).signInWithPassword({ email, password })
     if (error) throw new UnauthorizedException(error.message)
     return { user: data.user, session: data.session }
   }
 
   async signUp(email: string, password: string, nombre: string, tipo: string) {
     const supabase = getAnonClient()
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await (supabase.auth as any).signUp({
       email, password,
       options: { data: { nombre, tipo } },
     })
@@ -39,7 +39,7 @@ export class AuthService {
 
   async getMe(token: string) {
     const supabase = getAnonClient()
-    const { data: { user }, error } = await supabase.auth.getUser(token)
+    const { data: { user }, error } = await (supabase.auth as any).getUser(token)
     if (error || !user) throw new UnauthorizedException('Token inválido')
     return user
   }

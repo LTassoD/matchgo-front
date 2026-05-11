@@ -24,11 +24,11 @@ async function bootstrap() {
   return server
 }
 
-let cachedServer: express.Express
+let cachedApp: any
 
 export default async function handler(req: any, res: any) {
-  if (!cachedServer) {
-    cachedServer = await bootstrap()
+  if (!cachedApp) {
+    cachedApp = await bootstrap()
   }
-  cachedServer(req, res)
+  cachedApp(req, res)
 }
