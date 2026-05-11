@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, Button } from '@/components/ui'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import { empresaApi, ofertaApi } from '@/lib/api'
+import { regiones, comunasPorRegion } from '@/lib/ubicaciones'
 
 const categorias = [
   { value: '', label: 'Selecciona una categoría' },
@@ -15,13 +16,6 @@ const categorias = [
   { value: 'Niñera', label: 'Niñera / Cuidado de niños' },
   { value: 'Carga', label: 'Carga / Descarga' },
   { value: 'Otro', label: 'Otro' },
-]
-
-const regiones = [
-  { value: '', label: 'Selecciona una región' },
-  { value: 'RM', label: 'Región Metropolitana' },
-  { value: 'V', label: 'Valparaíso' },
-  { value: 'VI', label: "O'Higgins" },
 ]
 
 const jornadas = [
@@ -193,14 +187,18 @@ export default function NuevaOfertaPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Comuna *</label>
-                  <input
+                  <select
                     name="comuna"
-                    placeholder="Ej: Santiago Centro"
                     value={form.comuna}
                     onChange={handleChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
+                  >
+                    <option value="">Selecciona una comuna</option>
+                    {form.region && (comunasPorRegion[form.region] || []).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </Card>

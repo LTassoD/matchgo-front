@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, Button, Input, Badge } from '@/components/ui'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { trabajadorApi } from '@/lib/api'
+import { regiones, comunasPorRegion } from '@/lib/ubicaciones'
 
 const validarRut = (rut: string): boolean => {
   if (!rut || rut.length < 3) return false
@@ -240,9 +241,10 @@ export default function PerfilPage() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   >
-                    <option value="RM">Región Metropolitana</option>
-                    <option value="V">Valparaíso</option>
-                    <option value="VI">O'Higgins</option>
+                    <option value="">Selecciona una región</option>
+                    {regiones.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
                   </select>
                 ) : (
                   <p className="text-gray-900">{perfil?.region}</p>
@@ -251,12 +253,17 @@ export default function PerfilPage() {
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Comuna</label>
                 {editando ? (
-                  <input
+                  <select
                     name="comuna"
                     value={perfil?.comuna || ''}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
+                  >
+                    <option value="">Selecciona una comuna</option>
+                    {perfil?.region && (comunasPorRegion[perfil.region] || []).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 ) : (
                   <p className="text-gray-900">{perfil?.comuna}</p>
                 )}

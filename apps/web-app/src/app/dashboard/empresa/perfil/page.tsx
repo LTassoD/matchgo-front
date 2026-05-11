@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Card, Button } from '@/components/ui'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { empresaApi } from '@/lib/api'
+import { regiones, comunasPorRegion } from '@/lib/ubicaciones'
 
 export default function PerfilPage() {
   const [loading, setLoading] = useState(true)
@@ -180,9 +181,10 @@ export default function PerfilPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Región</label>
                 {editando ? (
                   <select name="region" value={perfil?.region || ''} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    <option value="RM">Región Metropolitana</option>
-                    <option value="V">Valparaíso</option>
-                    <option value="VI">O'Higgins</option>
+                    <option value="">Selecciona una región</option>
+                    {regiones.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
                   </select>
                 ) : (
                   <p className="text-gray-900">{perfil?.region}</p>

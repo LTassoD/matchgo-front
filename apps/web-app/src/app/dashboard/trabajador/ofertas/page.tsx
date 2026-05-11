@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Card, Button, Spinner, Badge } from '@/components/ui'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { ofertaApi } from '@/lib/api'
+import { regiones } from '@/lib/ubicaciones'
 import { mockOfertas } from '@/lib/mockData'
 
 export default function OfertasPage() {
@@ -81,9 +82,9 @@ export default function OfertasPage() {
               onChange={handleFilterChange}
             >
               <option value="">Todas</option>
-              <option value="RM">Región Metropolitana</option>
-              <option value="V">Valparaíso</option>
-              <option value="VI">O'Higgins</option>
+              {regiones.map(r => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
             </select>
           </div>
           <div>

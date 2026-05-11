@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, Button, Badge } from '@/components/ui'
 import { mockTrabajadores } from '@/lib/mockData'
+import { regiones } from '@/lib/ubicaciones'
 
 export default function CandidatosPage() {
   const [loading, setLoading] = useState(false)
@@ -57,8 +58,9 @@ export default function CandidatosPage() {
               onChange={handleFilterChange}
             >
               <option value="">Todas</option>
-              <option value="RM">Región Metropolitana</option>
-              <option value="V">Valparaíso</option>
+              {regiones.map(r => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
             </select>
           </div>
           <div>
